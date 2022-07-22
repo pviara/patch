@@ -12,7 +12,7 @@ export class ConfigService {
     static get botToken(): string {
         return this.getFromEnvFile('BOT_TOKEN');
     }
-    
+
     private static getFromEnvFile(key: string): string {
         const value = process.env[key];
         if (!value) {
