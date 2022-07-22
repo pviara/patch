@@ -1,0 +1,19 @@
+{
+  "name": "patch",
+  "version": "0.0.0",
+  "description": "Fantastic bot for INTECH Discord server.",
+  "main": "dist/app.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pviara/patch.git"
+  },
+  "author": "pviara",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pviara/patch/issues"
+  },
+  "homepage": "https://github.com/pviara/patch#readme"
+}
