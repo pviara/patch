@@ -1,25 +1,28 @@
 import { ConfigService } from '../infrastructure/config.service';
+import { PartialRoleData, Routes } from 'discord.js';
 import { RESTService } from '../infrastructure/rest.service';
-import { RoleData, Routes } from 'discord.js';
 
 export class RoleService {
-    static async getGuildRoles(): Promise<RoleData[]> {
-        const roles = (await RESTService.get(
-            Routes.guildRoles(ConfigService.guildId),
-        )) as RoleData[];
+    private static roles: PartialRoleData[] = [];
 
-        return this.filterRoles(roles);
-    }
-
-    private static filterRoles(roles: RoleData[]): RoleData[] {
-        return roles.filter((role) => !this.isSecuredRole(role));
-    }
-
-    private static isSecuredRole(role: RoleData): boolean {
-        if (!role.name) {
-            return true;
+    static async assignRole(memberId: string, roleName: string): Promise<void> {
+        const match = this.roles.find((role) => role.name === roleName);
+        if (!match?.id) {
+            return;
         }
 
-        return role.name?.startsWith('_') || role.name?.startsWith('@');
+        await RESTService.put(
+            Routes.guildMemberRole(
+                ConfigService.guildId,
+                memberId,
+                match.id.toString(),
+            ),
+        );
+    }
+
+    static async setupRoles(): Promise<void> {
+        this.roles = (await RESTService.get(
+            Routes.guildRoles(ConfigService.guildId),
+        )) as PartialRoleData[];
     }
 }

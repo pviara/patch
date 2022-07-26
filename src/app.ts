@@ -1,7 +1,6 @@
 import {
     ActionRowBuilder,
     Client,
-    Message,
     SelectMenuBuilder,
     SelectMenuInteraction,
 } from 'discord.js';
@@ -19,13 +18,14 @@ const client = new Client({ intents: ['Guilds', 'GuildMessages'] });
 
 client.once('ready', async () => {
     console.log('Ready!');
+    await RoleService.setupRoles();
 });
 
 client.on('messageCreate', async (message) => {
     if (message.author.id === ConfigService.appId) {
         return;
     }
-    
+
     const menu = new SelectMenuBuilder()
         .setCustomId('specialQuestion')
         .setPlaceholder('Sélectionne ton statut...')
@@ -37,10 +37,10 @@ client.on('messageCreate', async (message) => {
         );
 
     const row = new ActionRowBuilder<typeof menu>().addComponents(menu);
-    
+
     await message.author.send({
         content: specialQuestion.text,
-        components: [row]
+        components: [row],
     });
 });
 
@@ -49,12 +49,12 @@ client.on('interactionCreate', async (interaction) => {
         return;
     }
 
-    const { customId, values } = interaction;
+    const { customId, values, user } = interaction;
     const [selected] = values;
 
     interaction.message.edit({
         content: `Tu as répondu "${selected}"`,
-        components: []
+        components: [],
     });
 
     switch (customId) {
@@ -66,9 +66,11 @@ client.on('interactionCreate', async (interaction) => {
                     campusQuestion,
                     'Sélectionne ton campus...',
                 );
+                await RoleService.assignRole(user.id, selected);
                 break;
             }
 
+            await RoleService.assignRole(user.id, selected);
             await interaction.reply({
                 content:
                     "Merci pour ta réponse. Je t'ai assigné le rôle qu'il te faut !",
@@ -77,6 +79,7 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         case 'campusQuestion': {
+            await RoleService.assignRole(user.id, selected);
             await replyWithSelectMenuTo(
                 interaction,
                 'semesterQuestion',
@@ -87,6 +90,7 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         case 'semesterQuestion': {
+            await RoleService.assignRole(user.id, selected);
             if (selected.includes('S1') || selected.includes('S2')) {
                 await interaction.reply({
                     content:
@@ -105,6 +109,7 @@ client.on('interactionCreate', async (interaction) => {
         }
 
         case 'courseQuestion': {
+            await RoleService.assignRole(user.id, selected);
             await interaction.reply({
                 content:
                     "Terminé ! Je me suis occupé de te donner tous les rôles qu'il te faut.",
